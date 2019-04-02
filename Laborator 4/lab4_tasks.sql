@@ -152,5 +152,49 @@ FROM employees;
 SELECT SUM(commission_pct)/COUNT(*)
 FROM employees;
 
--- 26
+-- 27
+select job_id as "JOB",
+        sum(decode(department_id, 30, salary, 0)) as "Dep30",
+        sum(decode(department_id, 50, salary, 0)) as "Dep50",
+        sum(decode(department_id, 80, salary, 0)) as "Dep80",
+        sum(salary) as "Total"
+from employees
+group by job_id;  
 
+-- 28
+select count(*) as "Total",
+    sum(decode(extract(year from hire_date), 2000, 1, 0)) as "2000",
+    sum(decode(extract(year from hire_date), 1999, 1, 0)) as "1999",
+    sum(decode(extract(year from hire_date), 1998, 1, 0)) as "1998",
+    sum(decode(extract(year from hire_date), 1997, 1, 0)) as "1997"
+from employees;
+
+-- 29
+SELECT d.department_id, department_name, nvl(a.suma, 0) Suma
+FROM departments d full join (SELECT department_id ,SUM(salary) suma
+                    FROM employees
+                    GROUP BY department_id) a
+on d.department_id = a.department_id;
+
+-- 30
+select e.last_name, e.salary, e.department_id, a.avg_salary
+from employees e join (select department_id, sum(salary) / count(*) avg_salary
+                    from employees
+                    group by department_id) a
+on nvl(e.department_id, -1) = nvl(a.department_id, -1);
+
+-- 31
+select e.last_name, e.salary, e.department_id, a.avg_salary, a.cnt_employees
+from employees e join (select department_id, sum(salary) / count(*) avg_salary, count(*) cnt_employees
+                    from employees
+                    group by department_id) a
+on nvl(e.department_id, -1) = nvl(a.department_id, -1);
+
+-- 32
+select d.department_id, d.department_name, e.last_name Name, a.min_salary
+from employees e full join departments d on (e.department_id=d.department_id)
+full outer join (select e.department_id, min(e.salary) as min_salary
+                 from employees e
+                 group by e.department_id) a 
+on (nvl(d.department_id, -1) = nvl(a.department_id, -1))
+where nvl(e.salary, -1) = nvl(a.min_salary, -1);
